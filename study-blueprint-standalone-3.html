@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>내 시험 청사진</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F2E8; --ink:#1C2530; --blue:#2B4C7E; --blue-deep:#182F52;
+    --amber:#D98E30; --teal:#3F6B64; --line:#C9C2AE; --card:#FFFDF7; --red:#B23A3A;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);font-family:'Noto Sans KR',sans-serif;color:var(--ink);-webkit-tap-highlight-color:transparent;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .display{font-family:'Noto Sans KR',sans-serif;font-weight:900;letter-spacing:-0.02em;}
+  #app{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:40px;}
+  .top{padding:28px 20px 12px;}
+  .eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);}
+  .eyebrow span{font-size:11px;letter-spacing:.15em;color:var(--blue);}
+  h1{font-size:28px;margin:0;}
+  .sub{color:#6B7280;font-size:13px;margin:4px 0 0;}
+  .upload-box{width:100%;border:2px dashed var(--blue);color:var(--blue);background:rgba(43,76,126,.05);
+    border-radius:16px;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;margin:16px 0;cursor:pointer;font-size:14px;}
+  .upload-box input{position:absolute;width:1px;height:1px;opacity:0;}
+  .btn{border:none;border-radius:12px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:13px;cursor:pointer;}
+  .btn-amber{background:var(--amber);color:#fff;}
+  .btn-blue{background:var(--blue);color:#fff;}
+  .btn-outline{background:transparent;border:1px solid var(--blue);color:var(--blue);}
+  .btn-block{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .section{padding:0 20px;}
+  .day-row{display:flex;align-items:center;gap:8px;margin:18px 0 8px;}
+  .day-chip{width:24px;height:24px;border-radius:6px;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .hr{flex:1;height:1px;background:var(--line);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:8px;
+    background-image:linear-gradient(rgba(43,76,126,.06) 1px, transparent 1px),linear-gradient(90deg, rgba(43,76,126,.06) 1px, transparent 1px);
+    background-size:22px 22px;position:relative;}
+  .card h3{margin:0;font-size:15px;}
+  .card p{margin:4px 0 0;font-size:11px;color:#8A8272;}
+  .card .del{position:absolute;top:10px;right:10px;opacity:.4;background:none;border:none;cursor:pointer;font-size:14px;}
+  .empty{text-align:center;padding:60px 20px;color:#9CA3AF;font-size:12px;line-height:1.6;}
+  .tabs{display:flex;gap:8px;padding:16px 20px 0;}
+  .tab{flex:1;text-align:center;padding:10px;border-radius:10px;border:1px solid var(--blue);font-size:12px;cursor:pointer;color:var(--blue);}
+  .tab.active{background:var(--blue);color:#fff;}
+  .header-bar{display:flex;align-items:center;gap:10px;padding:24px 20px 14px;border-bottom:1px solid var(--line);}
+  .back{background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink);}
+  .rec-btn{width:78px;height:78px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;margin:16px auto;cursor:pointer;font-size:26px;color:#fff;}
+  textarea, input[type=text], input[type=password]{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:'Noto Sans KR',sans-serif;font-size:13px;background:var(--card);color:var(--ink);}
+  textarea{min-height:80px;resize:vertical;}
+  .field-label{font-size:11px;color:var(--blue);font-family:'JetBrains Mono',monospace;margin-bottom:6px;display:block;}
+  .transcript-box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;white-space:pre-wrap;min-height:60px;}
+  .rec-status{text-align:center;font-size:12px;color:var(--red);display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;}
+  .blink{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0;}
+  .thumbs .t{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;height:90px;}
+  .thumbs img{width:100%;height:100%;object-fit:cover;}
+  .thumbs .x{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;}
+  .file-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--card);color:var(--blue);padding:6px;}
+  .file-tile-name{font-size:9px;color:var(--ink);text-align:center;word-break:break-all;line-height:1.2;max-height:22px;overflow:hidden;}
+  .spin-dark{display:inline-block;width:14px;height:14px;border:2px solid var(--blue);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
+  .divider{display:flex;align-items:center;gap:10px;margin:20px 0 4px;font-size:11px;color:#9CA3AF;font-family:'JetBrains Mono',monospace;}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line);}
+  .err{color:var(--red);font-size:12px;font-family:'JetBrains Mono',monospace;margin-top:8px;}
+  .hint{color:#9CA3AF;font-size:11px;line-height:1.5;}
+  .summary-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;font-size:13px;white-space:pre-wrap;line-height:1.7;}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .center-loading{display:flex;justify-content:center;padding:60px 0;}
+  .spin-big{width:26px;height:26px;border:3px solid var(--blue);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
+  .settings-link{position:fixed;top:18px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--blue);z-index:5;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const MODEL = "claude-sonnet-5";
+const DAY_ORDER = ["월","화","수","목","금","토","일"];
+const DAY_COLORS = {"월":"#2B4C7E","화":"#D98E30","수":"#182F52","목":"#3F6B64","금":"#2B4C7E","토":"#D98E30","일":"#3F6B64"};
+
+let state = {
+  apiKey: localStorage.getItem("sb_api_key") || "",
+  screen: "home",
+  folders: JSON.parse(localStorage.getItem("sb_folders") || "[]"),
+  activeFolderId: null,
+  tab: "record",
+  uploading: false,
+  uploadError: "",
+  recording: false,
+  playbackMode: false,
+  interim: "",
+  materialItems: [], // {type:'image'|'pdf'|'text', name, data(base64, image/pdf only), text(docx/pptx only)}
+  materialLoading: false,
+  materialError: "",
+  summarizing: false,
+  summaryError: "",
+  manualPaste: "",
+  correcting: false,
+  correctError: "",
+};
+let recognition = null;
+
+function saveFolders(){ localStorage.setItem("sb_folders", JSON.stringify(state.folders)); }
+function loadFolderData(id){
+  try{ return JSON.parse(localStorage.getItem("sb_fd_"+id) || '{"transcript":"","notesText":"","summary":""}'); }
+  catch(e){ return {transcript:"",notesText:"",summary:""}; }
+}
+function saveFolderData(id, data){ localStorage.setItem("sb_fd_"+id, JSON.stringify(data)); }
+
+function fileToResizedBase64(file, maxDim){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if(w>maxDim || h>maxDim){ const s = maxDim/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+        const canvas = document.createElement("canvas");
+        canvas.width=w; canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",0.85).split(",")[1]);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function fileToRawBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = () => resolve(r.result.split(",")[1]);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function extractDocxText(file){
+  const zip = await JSZip.loadAsync(file);
+  const xmlFile = zip.file("word/document.xml");
+  if(!xmlFile) throw new Error("문서를 읽을 수 없어요");
+  const xml = await xmlFile.async("text");
+  const paragraphs = xml.split(/<\/w:p>/).map(p => {
+    const runs = [...p.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map(m=>m[1]);
+    return runs.join("");
+  }).filter(Boolean);
+  return paragraphs.join("\n");
+}
+
+async function extractPptxText(file){
+  const zip = await JSZip.loadAsync(file);
+  const slideFiles = Object.keys(zip.files)
+    .filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+    .sort((a,b) => {
+      const na = parseInt(a.match(/slide(\d+)\.xml/)[1]);
+      const nb = parseInt(b.match(/slide(\d+)\.xml/)[1]);
+      return na - nb;
+    });
+  if(slideFiles.length===0) throw new Error("슬라이드를 읽을 수 없어요");
+  const slideTexts = [];
+  for(let i=0;i<slideFiles.length;i++){
+    const xml = await zip.file(slideFiles[i]).async("text");
+    const runs = [...xml.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>m[1]);
+    slideTexts.push(`[슬라이드 ${i+1}]\n` + runs.join(" "));
+  }
+  return slideTexts.join("\n\n");
+}
+
+function classifyFile(file){
+  const name = file.name.toLowerCase();
+  if(file.type.startsWith("image/")) return "image";
+  if(file.type === "application/pdf" || name.endsWith(".pdf")) return "pdf";
+  if(name.endsWith(".docx")) return "docx";
+  if(name.endsWith(".pptx")) return "pptx";
+  if(name.endsWith(".doc") || name.endsWith(".ppt")) return "legacy_office";
+  return "unsupported";
+}
+
+async function callClaude(content){
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key": state.apiKey,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body: JSON.stringify({ model: MODEL, max_tokens: 4000, messages:[{role:"user", content}] })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message || "API 오류");
+  return (data.content||[]).map(b=>b.type==="text"?b.text:"").join("\n");
+}
+
+function icon(name){
+  const icons = {
+    upload: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0-12l4 4m-4-4L8 7M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+    mic: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>',
+    square: '<svg width="22" height="22" viewBox="0 0 24 24" fill="white"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+    camera: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z"/><circle cx="12" cy="14" r="3.5"/></svg>',
+    sparkle: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 5L19 10l-5.5 2L12 17l-1.5-5L5 10l5.5-2z"/></svg>',
+    trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>',
+    back: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>',
+    gear: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    file: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v6h6"/></svg>',
+  };
+  return icons[name] || "";
+}
+
+function render(){
+  const app = document.getElementById("app");
+  if(!state.apiKey){ app.innerHTML = renderOnboarding(); attachOnboarding(); return; }
+  if(state.screen === "home"){ app.innerHTML = renderHome(); attachHome(); return; }
+  if(state.screen === "folder"){ app.innerHTML = renderFolder(); attachFolder(); return; }
+}
+
+// ---------- Onboarding ----------
+function renderOnboarding(){
+  return `
+  <div class="top">
+    <div class="eyebrow"><div class="dot"></div><span class="mono">HANYANG · ENERGY ENG</span></div>
+    <h1 class="display">API 키 입력</h1>
+    <p class="sub">Anthropic API 키를 입력하면 시간표 인식과 정리 기능을 쓸 수 있어요. 이 키는 이 기기 브라우저에만 저장되고 다른 곳으로 전송되지 않아요.</p>
+  </div>
+  <div class="section">
+    <label class="field-label">API 키 (sk-ant-...)</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button class="btn btn-amber btn-block" id="saveKeyBtn" style="margin-top:14px;">저장하고 시작하기</button>
+    <p class="hint" style="margin-top:14px;">console.anthropic.com 에서 발급받은 키를 사용하세요.</p>
+  </div>`;
+}
+function attachOnboarding(){
+  document.getElementById("saveKeyBtn").onclick = () => {
+    const v = document.getElementById("apiKeyInput").value.trim();
+    if(!v){ return; }
+    state.apiKey = v;
+    localStorage.setItem("sb_api_key", v);
+    render();
+  };
+}
+
+// ---------- Home ----------
+function renderHome(){
+  const grouped = DAY_ORDER.map(d => ({day:d, items: state.folders.filter(f=>f.day===d)})).filter(g=>g.items.length>0);
+  let body = "";
+  if(state.folders.length===0 && !state.uploading){
+    body += `<div class="empty">아직 등록된 수업이 없어요.<br/>시간표를 업로드하면 자동으로 폴더가 생겨요.</div>`;
+  }
+  grouped.forEach(g=>{
+    body += `<div class="day-row"><div class="day-chip mono" style="background:${DAY_COLORS[g.day]}">${g.day}</div><div class="hr"></div></div>`;
+    g.items.forEach(f=>{
+      body += `<div class="card">
+        <h3 class="display">${escapeHtml(f.name)}</h3>
+        <p class="mono">${f.startTime?`${f.startTime}–${f.endTime}`:""}${f.location?`  ·  ${escapeHtml(f.location)}`:""}${f.professor?`  ·  ${escapeHtml(f.professor)}`:""}</p>
+        <button class="del" data-open="${f.id}">열기</button>
+        <button class="del" style="right:52px" data-del="${f.id}">${icon("trash")}</button>
+      </div>`;
+    });
+  });
+  return `
+  <button class="settings-link" id="settingsBtn">${icon("gear")}</button>
+  <div class="top">
+    <div class="eyebrow"><div class="dot"></div><span class="mono">HANYANG · ENERGY ENG · 3-2</span></div>
+    <h1 class="display">내 시험 청사진</h1>
+    <p class="sub">수업마다 도면을 펼쳐 정리하세요</p>
+  </div>
+  <div class="section">
+    <label class="upload-box" for="timetableFile">
+      ${state.uploading ? `<span class="spin"></span><span class="mono">시간표 분석 중...</span>` : `${icon("upload")}<span class="mono">시간표 이미지 업로드</span>`}
+      <input type="file" accept="image/*" id="timetableFile" ${state.uploading?"disabled":""}/>
+    </label>
+    <button class="btn btn-outline btn-block" id="manualAddBtn" style="margin-bottom:10px;">직접 수업 추가</button>
+    ${state.uploadError ? `<p class="err">${escapeHtml(state.uploadError)}</p>` : ""}
+  </div>
+  <div class="section">${body}</div>`;
+}
+function attachHome(){
+  document.getElementById("settingsBtn").onclick = () => {
+    if(confirm("API 키를 다시 입력할까요?")){ state.apiKey=""; localStorage.removeItem("sb_api_key"); render(); }
+  };
+  document.getElementById("timetableFile").onchange = handleTimetableUpload;
+  document.getElementById("manualAddBtn").onclick = () => {
+    const name = prompt("수업 이름을 입력하세요");
+    if(!name) return;
+    const day = prompt("요일 (월/화/수/목/금/토/일)", "월") || "월";
+    const start = prompt("시작 시간 (예: 09:00)", "") || "";
+    const end = prompt("끝나는 시간 (예: 10:15)", "") || "";
+    const f = { id:"f_"+Date.now(), name, day, startTime:start, endTime:end, professor:"", location:"" };
+    state.folders.push(f); saveFolders(); render();
+  };
+  document.querySelectorAll("[data-open]").forEach(el=>{
+    el.onclick = () => { state.activeFolderId = el.getAttribute("data-open"); state.screen="folder"; state.tab="record"; state.materialItems=[]; state.materialError=""; render(); };
+  });
+  document.querySelectorAll("[data-del]").forEach(el=>{
+    el.onclick = () => {
+      const id = el.getAttribute("data-del");
+      if(confirm("이 수업 폴더를 삭제할까요?")){
+        state.folders = state.folders.filter(f=>f.id!==id);
+        localStorage.removeItem("sb_fd_"+id);
+        saveFolders(); render();
+      }
+    };
+  });
+}
+
+async function handleTimetableUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  state.uploading = true; state.uploadError=""; render();
+  try{
+    const base64 = await fileToResizedBase64(file, 1600);
+    const text = await callClaude([
+      { type:"image", source:{ type:"base64", media_type:"image/jpeg", data: base64 } },
+      { type:"text", text:'이 시간표 이미지를 분석해서 수업 목록을 JSON 배열로만 출력해줘. 각 항목 형식: {"name":"수업명","day":"월","startTime":"09:00","endTime":"10:15","professor":"교수명 또는 빈 문자열","location":"강의실 또는 빈 문자열"}. day는 한글 한 글자(월화수목금토일)로. 설명, 코드블록 없이 JSON 배열만 출력해.' }
+    ]);
+    const cleaned = text.replace(/```json|```/g,"").trim();
+    const parsed = JSON.parse(cleaned);
+    if(!Array.isArray(parsed) || parsed.length===0) throw new Error("empty");
+    const existing = new Set(state.folders.map(f=>f.name));
+    const fresh = parsed.filter(c=>c.name && !existing.has(c.name)).map((c,i)=>({
+      id:"f_"+Date.now()+"_"+i, name:c.name, day:c.day||"월", startTime:c.startTime||"",
+      endTime:c.endTime||"", professor:c.professor||"", location:c.location||""
+    }));
+    state.folders = [...state.folders, ...fresh];
+    saveFolders();
+  }catch(err){
+    state.uploadError = "시간표를 인식하지 못했어요 (" + err.message + "). 더 선명한 이미지로 다시 시도하거나 '직접 수업 추가'를 이용하세요.";
+  }finally{
+    state.uploading = false; render();
+  }
+}
+
+// ---------- Folder ----------
+function activeFolder(){ return state.folders.find(f=>f.id===state.activeFolderId); }
+
+function renderFolder(){
+  const f = activeFolder();
+  const data = loadFolderData(f.id);
+  let tabContent = "";
+  if(state.tab==="record"){
+    tabContent = `
+      <button class="rec-btn" id="recBtn" style="background:${state.recording?'var(--red)':'var(--amber)'}">${icon(state.recording?"square":"mic")}</button>
+      ${state.recording ? `<div class="rec-status"><div class="blink"></div>${state.playbackMode?'강의 파일 재생하며 변환 중':'녹음 중'}... ${state.interim?('"'+escapeHtml(state.interim)+'"'):""}</div>` : ""}
+      <textarea id="transcriptEdit" class="transcript-box" style="min-height:100px;" placeholder="아직 녹음된 내용이 없어요.">${escapeHtml(data.transcript)}</textarea>
+      <button class="btn btn-outline btn-block" id="correctBtn" style="margin-top:8px;">
+        ${state.correcting ? `<span class="spin-dark"></span> 교정 중...` : `${icon("sparkle")} AI로 전사 교정하기`}
+      </button>
+      ${state.correctError ? `<p class="err">${escapeHtml(state.correctError)}</p>` : ""}
+      <p class="hint" style="margin-top:6px;">직접 수정하거나, 위 버튼으로 전공 용어 오인식을 AI가 고치게 할 수 있어요.</p>
+
+      <div class="divider"><span>또는 · 온라인 강의</span></div>
+      <label class="upload-box" for="lectureFile" style="${state.recording?'opacity:.5;pointer-events:none;':''}">
+        ${icon("upload")}<span class="mono">강의 파일 업로드해서 재생·변환</span>
+        <input type="file" accept="audio/*,video/*" id="lectureFile"/>
+      </label>
+      <p class="hint">파일을 스피커로 재생하면서 마이크로 다시 인식해 텍스트로 바꿔요. 이어폰 대신 스피커로 재생하고, 조용한 곳에서 폰을 스피커 가까이 두면 정확도가 올라가요. 실시간 강의 녹음보다 정확도는 낮을 수 있어요.</p>
+      ${state.playbackMode ? `<audio id="lectureAudio" controls style="width:100%;margin-top:8px;"></audio>` : ""}
+
+      <label class="field-label" style="margin-top:14px;">이미 변환된 텍스트 붙여넣기</label>
+      <textarea id="manualPaste" placeholder="다른 앱(클로바노트 등)에서 변환한 텍스트가 있다면 여기에 붙여넣으세요">${escapeHtml(state.manualPaste)}</textarea>
+      <button class="btn btn-blue" id="addTextBtn" style="margin-top:8px;">텍스트 추가</button>
+    `;
+  } else if(state.tab==="material"){
+    tabContent = `
+      <label class="upload-box" for="materialFile">${state.materialLoading?`<span class="spin-dark"></span><span class="mono">파일 읽는 중...</span>`:`${icon("camera")}<span class="mono">사진 · PDF · PPT · Word 추가</span>`}
+        <input type="file" accept="image/*,.pdf,application/pdf,.ppt,.pptx,.doc,.docx" multiple id="materialFile" ${state.materialLoading?"disabled":""}/>
+      </label>
+      <div class="thumbs">${state.materialItems.map((item,i)=>{
+        if(item.type==="image"){
+          return `<div class="t"><img src="data:image/jpeg;base64,${item.data}"/><button class="x" data-rm="${i}">×</button></div>`;
+        }
+        return `<div class="t file-tile"><div class="file-tile-icon">${icon("file")}</div><div class="file-tile-name">${escapeHtml(item.name)}</div><button class="x" data-rm="${i}">×</button></div>`;
+      }).join("")}</div>
+      ${state.materialError ? `<p class="err">${escapeHtml(state.materialError)}</p>` : ""}
+      <p class="hint">사진·PDF는 원본 그대로, PPT/Word는 텍스트만 추출해서 사용해요. 정리본을 만들 때만 사용되고 저장되지 않으니, 올린 세션에서 바로 정리본을 만드세요.</p>
+      <label class="field-label" style="margin-top:10px;">메모 (선택)</label>
+      <textarea id="notesText" placeholder="추가로 기록해두고 싶은 내용">${escapeHtml(data.notesText)}</textarea>
+      <button class="btn btn-amber btn-block" id="summarizeBtn" style="margin-top:12px;">
+        ${state.summarizing ? `<span class="spin"></span> 정리 중...` : `${icon("sparkle")} 시험 대비 정리본 만들기`}
+      </button>
+      ${state.summaryError ? `<p class="err">${escapeHtml(state.summaryError)}</p>` : ""}
+    `;
+  } else {
+    tabContent = data.summary
+      ? `<div class="summary-box">${escapeHtml(data.summary)}</div>`
+      : `<div class="empty">아직 정리본이 없어요.<br/>'자료' 탭에서 정리본을 생성해보세요.</div>`;
+  }
+  return `
+  <div class="header-bar">
+    <button class="back" id="backBtn">${icon("back")}</button>
+    <div>
+      <h1 class="display" style="font-size:19px;">${escapeHtml(f.name)}</h1>
+      <p class="mono" style="font-size:11px;color:#8A8272;margin:2px 0 0;">${f.day} ${f.startTime}${f.startTime?"–"+f.endTime:""} ${f.professor?"· "+escapeHtml(f.professor):""}</p>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab ${state.tab==='record'?'active':''}" data-tab="record">녹음</div>
+    <div class="tab ${state.tab==='material'?'active':''}" data-tab="material">자료</div>
+    <div class="tab ${state.tab==='summary'?'active':''}" data-tab="summary">정리</div>
+  </div>
+  <div class="section" style="padding-top:16px;">${tabContent}</div>`;
+}
+
+function attachFolder(){
+  const f = activeFolder();
+  document.getElementById("backBtn").onclick = () => {
+    stopRecording();
+    state.screen="home"; state.materialItems=[]; state.materialError=""; render();
+  };
+  document.querySelectorAll("[data-tab]").forEach(el=>{
+    el.onclick = () => { state.tab = el.getAttribute("data-tab"); render(); };
+  });
+
+  if(state.tab==="record"){
+    document.getElementById("recBtn").onclick = () => state.recording ? stopRecording() : startRecording(f.id);
+    document.getElementById("lectureFile").onchange = (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      startPlaybackTranscription(file, f.id);
+    };
+    document.getElementById("transcriptEdit").onblur = (e) => {
+      const data = loadFolderData(f.id);
+      data.transcript = e.target.value;
+      saveFolderData(f.id, data);
+    };
+    document.getElementById("correctBtn").onclick = () => correctTranscript(f.id);
+    document.getElementById("addTextBtn").onclick = () => {
+      const ta = document.getElementById("manualPaste");
+      const v = ta.value.trim();
+      if(!v) return;
+      const data = loadFolderData(f.id);
+      data.transcript = (data.transcript ? data.transcript + "\n" : "") + v;
+      saveFolderData(f.id, data);
+      state.manualPaste = "";
+      render();
+    };
+    document.getElementById("manualPaste").oninput = (e) => { state.manualPaste = e.target.value; };
+  }
+
+  if(state.tab==="material"){
+    document.getElementById("materialFile").onchange = async (e) => {
+      const files = Array.from(e.target.files || []);
+      state.materialLoading = true; state.materialError=""; render();
+      for(const file of files){
+        const kind = classifyFile(file);
+        try{
+          if(kind === "image"){
+            const b64 = await fileToResizedBase64(file, 1400);
+            state.materialItems.push({ type:"image", name:file.name, data:b64 });
+          } else if(kind === "pdf"){
+            const b64 = await fileToRawBase64(file);
+            state.materialItems.push({ type:"pdf", name:file.name, data:b64 });
+          } else if(kind === "docx"){
+            const text = await extractDocxText(file);
+            state.materialItems.push({ type:"text", name:file.name, text });
+          } else if(kind === "pptx"){
+            const text = await extractPptxText(file);
+            state.materialItems.push({ type:"text", name:file.name, text });
+          } else if(kind === "legacy_office"){
+            state.materialError = `"${file.name}"은 옛 형식(.doc/.ppt)이라 읽을 수 없어요. .docx/.pptx로 저장해서 다시 올려주세요.`;
+          } else {
+            state.materialError = `"${file.name}"은 지원하지 않는 형식이에요.`;
+          }
+        }catch(err){
+          state.materialError = `"${file.name}"을 읽는 중 오류가 발생했어요.`;
+        }
+      }
+      state.materialLoading = false; render();
+    };
+    document.querySelectorAll("[data-rm]").forEach(el=>{
+      el.onclick = () => { state.materialItems.splice(parseInt(el.getAttribute("data-rm")),1); render(); };
+    });
+    document.getElementById("notesText").onblur = (e) => {
+      const data = loadFolderData(f.id);
+      data.notesText = e.target.value;
+      saveFolderData(f.id, data);
+    };
+    document.getElementById("summarizeBtn").onclick = () => generateSummary(f.id);
+  }
+}
+
+let lectureAudioEl = null;
+
+function startPlaybackTranscription(file, folderId){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert("이 브라우저는 실시간 음성인식을 지원하지 않아요. 크롬 브라우저를 사용해보세요."); return; }
+  state.playbackMode = true;
+  state.recording = true;
+  render();
+  const audio = document.getElementById("lectureAudio");
+  lectureAudioEl = audio;
+  audio.src = URL.createObjectURL(file);
+  startRecognitionEngine(folderId);
+  audio.play().catch(()=>{});
+  audio.onended = () => stopRecording();
+}
+
+function startRecording(folderId){
+  state.playbackMode = false;
+  startRecognitionEngine(folderId);
+  state.recording = true;
+  render();
+}
+
+function startRecognitionEngine(folderId){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert("이 브라우저는 실시간 음성인식을 지원하지 않아요. 크롬 브라우저를 사용해보세요."); return; }
+  recognition = new SR();
+  recognition.lang = "ko-KR";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.onresult = (e) => {
+    let final="", interim="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) final += t; else interim += t;
+    }
+    if(final){
+      const data = loadFolderData(folderId);
+      data.transcript = (data.transcript ? data.transcript+" " : "") + final;
+      saveFolderData(folderId, data);
+    }
+    state.interim = interim;
+    render();
+  };
+  recognition.onend = () => { if(state.recording && recognition){ try{ recognition.start(); }catch(e){} } };
+  recognition.start();
+}
+function stopRecording(){
+  state.recording = false; state.interim=""; state.playbackMode = false;
+  if(recognition){ const r = recognition; recognition=null; try{ r.stop(); }catch(e){} }
+  if(lectureAudioEl){ try{ lectureAudioEl.pause(); }catch(e){} lectureAudioEl=null; }
+  render();
+}
+
+async function correctTranscript(folderId){
+  const f = state.folders.find(x=>x.id===folderId);
+  const ta = document.getElementById("transcriptEdit");
+  const data = loadFolderData(folderId);
+  if(ta) data.transcript = ta.value;
+  if(!data.transcript || !data.transcript.trim()){
+    state.correctError = "교정할 전사 텍스트가 없어요.";
+    render(); return;
+  }
+  state.correcting = true; state.correctError=""; render();
+  try{
+    const text = await callClaude([{ type:"text", text:
+      `아래는 "${f.name}" 수업을 음성인식(STT)으로 변환한 강의 전사 텍스트야. 발음이 비슷해서 잘못 인식됐을 법한 전공 용어, 숫자, 어색한 띄어쓰기만 자연스럽게 고쳐줘. 내용을 요약하거나 새로운 문장을 추가하지 말고, 교정된 전체 텍스트만 출력해줘 (설명, 코드블록 없이).\n\n[전사 텍스트]\n${data.transcript}`
+    }]);
+    data.transcript = text.trim();
+    saveFolderData(folderId, data);
+  }catch(err){
+    state.correctError = "교정 중 오류가 발생했어요: " + err.message;
+  }finally{
+    state.correcting = false; render();
+  }
+}
+
+async function generateSummary(folderId){
+  const f = state.folders.find(x=>x.id===folderId);
+  const data = loadFolderData(folderId);
+  const notesTextEl = document.getElementById("notesText");
+  if(notesTextEl) data.notesText = notesTextEl.value;
+  if(!data.transcript && !data.notesText && state.materialItems.length===0){
+    state.summaryError = "녹음 텍스트, 메모, 자료 파일 중 하나는 있어야 정리할 수 있어요.";
+    render(); return;
+  }
+  state.summarizing = true; state.summaryError=""; render();
+  try{
+    const imageBlocks = state.materialItems.filter(i=>i.type==="image").map(i => ({ type:"image", source:{ type:"base64", media_type:"image/jpeg", data: i.data } }));
+    const pdfBlocks = state.materialItems.filter(i=>i.type==="pdf").map(i => ({ type:"document", source:{ type:"base64", media_type:"application/pdf", data: i.data } }));
+    const extractedTexts = state.materialItems.filter(i=>i.type==="text")
+      .map(i => `--- 파일: ${i.name} ---\n${i.text}`).join("\n\n");
+    const content = [
+      ...imageBlocks,
+      ...pdfBlocks,
+      { type:"text", text: `다음은 "${f.name}" 수업의 강의 녹음 텍스트, 메모, 그리고 (있다면) 자료/판서 사진·PDF·PPT/Word에서 추출한 텍스트입니다. 시험 대비용으로 핵심 개념·정의·공식·예시를 구조화된 형태로 정리해줘.\n\n중요: 녹음 텍스트는 음성인식(STT)으로 변환된 것이라 발음이 비슷한 전공 용어가 잘못 인식됐을 수 있어. 자료(사진/PDF/PPT)에 정확한 용어나 표기가 나와 있다면 그걸 기준으로 삼아서, 녹음 텍스트의 오인식으로 보이는 부분은 자료 쪽 표기로 바로잡아 정리해줘. 자료와 녹음 내용이 서로 다른 내용을 다루고 있다면 억지로 합치지 말고 구분해서 정리해줘. 개념 간 관계와 시험에 나올 법한 포인트도 짚어줘.\n\n[강의 녹음 텍스트]\n${data.transcript||"(없음)"}\n\n[추가 메모]\n${data.notesText||"(없음)"}\n\n[업로드된 문서에서 추출한 텍스트]\n${extractedTexts||"(없음)"}` }
+    ];
+    const summary = await callClaude(content);
+    data.summary = summary;
+    saveFolderData(folderId, data);
+    state.tab = "summary";
+  }catch(err){
+    state.summaryError = "정리 중 오류가 발생했어요: " + err.message;
+  }finally{
+    state.summarizing = false; render();
+  }
+}
+
+function escapeHtml(s){
+  if(!s) return "";
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+render();
+</script>
+</body>
+</html>
